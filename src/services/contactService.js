@@ -57,3 +57,44 @@ export async function sendContactEmail(data) {
     `,
   });
 }
+
+export async function sendReplyEmail(contact, replyMessage) {
+  if (process.env.EMAIL_PASS === 'your-app-password' || !process.env.EMAIL_PASS) {
+    console.log("-----------------------------------------");
+    console.log("Mock Email Service (Credentials not set)");
+    console.log(`Reply to: ${contact.name} (${contact.email})`);
+    console.log(`Subject: Re: ${contact.subject}`);
+    console.log(`Reply: ${replyMessage}`);
+    console.log("-----------------------------------------");
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: contact.email,
+    subject: `Re: ${contact.subject} - Ocean Fresh Restaurant`,
+    html: `
+      <h2>Hello ${contact.name},</h2>
+      <p>Thank you for contacting Ocean Fresh Restaurant. Here is our reply to your message:</p>
+      <blockquote style="border-left: 4px solid #f59e0b; padding-left: 10px; color: #333;">
+        ${replyMessage.replace(/\n/g, "<br/>")}
+      </blockquote>
+      <br/>
+      <p>Your original message:</p>
+      <blockquote style="border-left: 4px solid #ccc; padding-left: 10px; color: #777;">
+        ${contact.message}
+      </blockquote>
+      <br/>
+      <p>Best Regards,</p>
+      <p><strong>The Ocean Fresh Team</strong></p>
+    `,
+  });
+}

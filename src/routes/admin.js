@@ -4,6 +4,7 @@ import { adminAuth } from "../middleware/adminMiddleware.js";
 import Reservation from "../models/Reservation.js";
 import Contact from "../models/Contact.js";
 import User from "../models/User.js";
+import { sendReplyEmail } from "../services/contactService.js";
 
 const router = express.Router();
 
@@ -43,6 +44,33 @@ router.get("/contacts", adminAuth, async (req, res) => {
   } catch (error) {
     console.error("Error fetching contacts:", error);
     res.status(500).json({ success: false, message: "Failed to fetch contacts" });
+  }
+});
+
+// Protected — Reply to a contact message
+router.post("/contacts/:id/reply", adminAuth, async (req, res) => {
+  try {
+    const { reply } = req.body;
+
+    if (!reply || !reply.trim()) {
+      return res.status(400).json({ success: false, message: "Reply message is required" });
+    }
+
+    const contact = await Contact.findById(req.params.id);
+    if (!contact) {
+      return res.status(404).json({ success: false, message: "Contact message not found" });
+    }
+
+    await sendReplyEmail(contact, reply);
+
+    contact.reply = reply;
+    contact.repliedAt = new Date();
+    await contact.save();
+
+    res.status(200).json({ success: true, message: "Reply sent successfully", data: contact });
+  } catch (error) {
+    console.error("Error sending reply:", error);
+    res.status(500).json({ success: false, message: "Failed to send reply" });
   }
 });
 
