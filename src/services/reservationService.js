@@ -7,6 +7,11 @@ export async function createReservation(data) {
 }
 
 export async function sendReservationNotification(data) {
+  if (process.env.EMAIL_PASS === 'your-app-password' || !process.env.EMAIL_PASS) {
+    console.log("Mock Email Service: New Reservation", data);
+    return;
+  }
+
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {

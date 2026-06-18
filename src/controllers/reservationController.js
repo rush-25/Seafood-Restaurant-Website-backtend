@@ -6,7 +6,11 @@ const reservationController = {
     try {
       const data = reservationSchema.parse(req.body);
       const reservation = await createReservation(data);
-      await sendReservationNotification(data);
+      try {
+        await sendReservationNotification(data);
+      } catch (emailError) {
+        console.error("Failed to send reservation email:", emailError);
+      }
 
       res.status(201).json({
         success: true,
