@@ -137,4 +137,35 @@ router.get("/stats", adminAuth, async (req, res) => {
   }
 });
 
+// Protected — Update a user
+router.put("/users/:id", adminAuth, async (req, res) => {
+  try {
+    const { name, email, phone, password } = req.body;
+    
+    // 1. Find the user
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // 2. Update provided fields
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (phone !== undefined) user.phone = phone; // allows clearing the phone field
+    
+    // 3. Update password only if provided
+    if (password && password.trim()) {
+      user.password = password;
+    }
+
+    // 4. Save (this automatically triggers the pre-save bcrypt hash hook in UserSchema!)
+    await user.save();
+    
+    res.status(200).json({ success: true, message: "User updated successfully", data: user });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ success: false, message: "Failed to update user" });
+  }
+});
+
 export default router;
