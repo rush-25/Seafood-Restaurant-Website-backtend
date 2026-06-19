@@ -61,16 +61,26 @@ router.post("/contacts/:id/reply", adminAuth, async (req, res) => {
       return res.status(404).json({ success: false, message: "Contact message not found" });
     }
 
-    await sendReplyEmail(contact, reply);
+    let emailSent = true;
+    try {
+      await sendReplyEmail(contact, reply);
+    } catch (emailError) {
+      console.error("Warning: Failed to send email notification", emailError);
+      emailSent = false;
+    }
 
     contact.reply = reply;
     contact.repliedAt = new Date();
     await contact.save();
 
-    res.status(200).json({ success: true, message: "Reply sent successfully", data: contact });
+    res.status(200).json({ 
+      success: true, 
+      message: emailSent ? "Reply sent successfully" : "Reply saved, but failed to send email", 
+      data: contact 
+    });
   } catch (error) {
     console.error("Error sending reply:", error);
-    res.status(500).json({ success: false, message: "Failed to send reply" });
+    res.status(500).json({ success: false, message: "Failed to send reply: " + error.message });
   }
 });
 
