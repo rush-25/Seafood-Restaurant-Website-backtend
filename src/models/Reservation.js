@@ -38,6 +38,12 @@ const ReservationSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    type: {
+      type: String,
+      required: [true, "Reservation type is required"],
+      enum: ["Table Reservation", "Private Event"],
+      default: "Table Reservation",
+    },
   },
   { timestamps: true }
 );
