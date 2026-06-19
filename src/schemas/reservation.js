@@ -8,4 +8,5 @@ export const reservationSchema = z.object({
   time: z.string(),
   guests: z.number().min(1).max(20),
   specialRequests: z.string().optional(),
+  type: z.enum(["Table Reservation", "Private Event"]).default("Table Reservation"),
 });
