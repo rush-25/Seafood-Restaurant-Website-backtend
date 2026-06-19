@@ -24,13 +24,13 @@ const UserSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
+      required: [true, "Phone number is required"],
       validate: {
         validator: function(v) {
-          return !v || /^\+?[0-9\s\-]{7,15}$/.test(v);
+          return /^(0|\+94)[\s-]*\d{2}[\s-]*\d{3}[\s-]*\d{4}$/.test(v);
         },
-        message: "Please fill a valid phone number"
+        message: "Please enter a valid phone number (e.g. 0712345678 or +94712345678)"
       },
-      default: "",
     },
   },
   { timestamps: true }
